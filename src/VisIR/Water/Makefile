@@ -44,6 +44,7 @@ NPOESS_LUT = \
 PHY_MODEL  = \
 	  IRSSEM_EmisCoeff_Define.o \
 	  IRSSEM_EmisCoeff_Reader.o \
+	  NESDIS_WaterVIS_BRDF_Module.o \
 	  NESDIS_WaterIR_BRDF_Module.o \
 	  NESDIS_WaterIR_Emiss_Module.o \
 	  NESDIS_WaterIR_PhyModel.o \

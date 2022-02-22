@@ -51,8 +51,8 @@
       Sensor_Azimuth_Angle         =   0.0_fp 
       Transmittance                =   0.6_fp
       
-      Exts%SensorObs%Azimuth_Angle = Sensor_Azimuth_Angle
-      Exts%Atmos%Transmittance = Transmittance 
+      SfcOptics%Sensor_Azimuth_Angle = Sensor_Azimuth_Angle
+      Options%Atmos%Transmittance = Transmittance 
 
       ! forward 
       Error_Status = CSEM_Compute_WaterMW_SfcOptics( &

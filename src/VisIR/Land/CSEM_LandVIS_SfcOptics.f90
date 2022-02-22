@@ -183,9 +183,9 @@ CONTAINS
     
          DO i = 1, n_Angles
           SfcOptics%Emissivity(i,1)           =  Emissivity
-          SfcOptics%Reflectivity(i,1,i,1)     =  ONE-Emissivity
           SfcOptics%Direct_Reflectivity(i,1)  =  ONE-Emissivity
-        END DO
+          SfcOptics%Reflectivity(1:n_Angles,1,i,1)     =  (ONE-Emissivity)*SfcOptics%Weight(i)
+       END DO
 
     END SELECT
 

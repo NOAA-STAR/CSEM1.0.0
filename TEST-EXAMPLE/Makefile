@@ -12,29 +12,37 @@
 # 
 ############################################################################################
 
-include make.macros
+include ../Build/make.macros
 
 # PATH to the shared source files
-LIB_DIR = /data/jcsda/mchen/CSEM/csem_v1.0.0
+CSEM_DIR = ..
 
-INC_FILE = -I$(LIB_DIR)/inc
-LIB_FILE = $(LIB_DIR)/lib/libCSEM.a 
+INC_FILE = -I$(CSEM_DIR)/include
+LIB_FILE = $(CSEM_DIR)/lib/libcsem.a 
 
 OBJ_FILE = 
 
 LDFLAGS_HDF5 =  $(HDF5_LIB) 
 FFLAGS_HDF5  =  $(HDF5_INC) 
-EXE_FILE1 = TEST_CSEM_WaterIR_SfcOptics
-EXE_FILE2 = TEST_CSEM_WaterIR_BRDF
-EXE_FILE3 = TEST_CSEM_LandMW_SfcOptics
-EXE_FILE4 = TEST_CSEM_WaterMW_SfcOptics
 
-EXE_FILE = $(EXE_FILE1)
+# Main files
+EXE_LandIR=TEST_CSEM_LandIR_SfcOptics
+EXE_LandVis=TEST_CSEM_LandVis_SfcOptics
+EXE_LandMW=TEST_CSEM_LandMW_SfcOptics
+EXE_WaterIR=TEST_CSEM_WaterIR_SfcOptics
+EXE_WaterIR_BRDF=TEST_CSEM_WaterIR_BRDF
+EXE_WaterMW=TEST_CSEM_WaterMW_SfcOptics
+EXE_SnowIR=TEST_CSEM_SnowIR_SfcOptics
+EXE_SnowMW=TEST_CSEM_SnowMW_SfcOptics
+EXE_IceMW=TEST_CSEM_IceMW_SfcOptics
+EXE_IceIR=TEST_CSEM_IceIR_SfcOptics
+
+EXE_FILE = $(EXE_SnowIR)
 
 all:  $(EXE_FILE)
 
 $(EXE_FILE): $ ${OBJ_FILE} ${EXE_FILE}.o
-	$(FL) $(NETCDF_LIB) $(LDFLAGS_HDF5) $(FLFLAGS) -o $(EXE_FILE) \
+	$(FL) $(NETCDF_LIB)  $(FLFLAGS) -o $(EXE_FILE) \
 	${OBJ_FILE} ${EXE_FILE}.o $(LIB_FILE) 
 
 
@@ -51,4 +59,4 @@ clean:
 .SUFFIXES:
 .SUFFIXES: .f90 .o
 .f90.o:
-	$(FC) -c $(FCFLAGS) $(INC_FILE) $(NETCDF_INC) $(FFLAGS_HDF5) $<
+	$(FC) -c $(FCFLAGS) $(INC_FILE) $(NETCDF_INC)  $<

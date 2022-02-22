@@ -129,6 +129,7 @@ CONTAINS
       REAL(fp):: em_vector(2),esh1,esv1,esh2,esv2,desh,desv,dem
       REAL(fp):: tbs(nwch)
       REAL(fp), INTENT(out) :: Emissivity_H, Emissivity_V
+      INTEGER :: i
 
 
     ! Initialization
@@ -138,6 +139,12 @@ CONTAINS
 
     ! Check available data
       IF ((Ts <= 150.0_fp) .OR. (Ts >= 280.0_fp) ) Ts = 260.0
+      DO i = 1, size(Tbs)
+        IF (Tbs(i) <= 50.0_fp .OR. Tbs(i) >= 500.0_fp) THEN
+           Emissivity_H = 0.3_fp ;  Emissivity_v = 0.3_fp
+           RETURN
+        ENDIF
+      ENDDO
 
     ! Emissivity at the local zenith angle of satellite measurements
       CALL  ATMS_SeaICE_ByTbTs_D(frequency,tbs,Ts,em_vector)

@@ -37,6 +37,11 @@ MODULE CSEM_WaterVIS_SfcOptics
 
   USE NESDIS_WaterVIS_PhyModel
   USE NPOESS_LUT_Module
+ 
+  USE NESDIS_WaterVIS_BRDF_Module,    ONLY: BRDF_type=>iVar_type,     &
+                                      NESDIS_VISWater_BRDF,            &
+                                      NESDIS_VISWater_BRDF_TL,         &
+                                      NESDIS_VISWater_BRDF_AD
 
   !Disable implicit typing
   IMPLICIT NONE
@@ -53,7 +58,10 @@ MODULE CSEM_WaterVIS_SfcOptics
   PUBLIC :: CSEM_Compute_WaterVIS_SfcOptics_AD
   PUBLIC :: iVar_type
   
-  REAL(fp), PARAMETER ::  ONE = 1.0_fp, ZERO = 0.0_fp
+  REAL(fp), PARAMETER ::  ONE = 1.0_fp, ZERO = 0.0_fp, TWO = 2.0_fp
+  REAL(fp), PARAMETER ::  PI  = 3.141592653589793238462643_fp
+  REAL(fp), PARAMETER ::  D2R  = PI/180.0_fp
+  INTEGER,  PARAMETER ::  MAX_n_Angles = 15
   
   ! --------------------------------------
   ! Structure definition to hold forward
@@ -61,7 +69,10 @@ MODULE CSEM_WaterVIS_SfcOptics
   ! --------------------------------------
   TYPE :: iVar_type
     PRIVATE
-    INTEGER :: Dummy = 0
+    INTEGER :: n_Angles
+    ! Variables in routines rough sea BRDF
+    TYPE(BRDF_type)   :: BRDF
+    CHARACTER(LEN=256):: AlgID
   END TYPE iVar_type
   TYPE(CSEM_Model_ID), SAVE  :: MODEL
 
@@ -138,13 +149,15 @@ CONTAINS
   FUNCTION CSEM_Compute_WaterVIS_SfcOptics( &
       Surface,                              &  ! Input
       SfcOptics,                            &  ! Output
-      Options)                              &  ! Optional Input
+      Options,                              &  ! Optional Input
+      iVar)                                 &  ! Input
     RESULT (IO_Status)
 
     TYPE(CSEM_Water_Surface),  INTENT(IN)    :: Surface
     TYPE(CSEM_SfcOptics_Type), INTENT(INOUT) :: SfcOptics
     ! Optional input    
     TYPE(CSEM_Options_Type), OPTIONAL, INTENT(IN)    :: Options
+    TYPE(iVar_type), OPTIONAL :: iVar  
     ! Function result
     INTEGER ::  IO_Status
 
@@ -155,16 +168,27 @@ CONTAINS
     CHARACTER(LEN=256) :: Message
     INTEGER :: Stype 
     REAL(fp):: Emissivity
-    INTEGER :: i, n_Angles
-
+    REAL(fp):: Sensor_Zenith_Radian, Sensor_Azimuth_Radian
+    REAL(fP):: Source_Zenith_Radian, Source_Azimuth_Radian
+    REAL(fp):: Relative_Azimuth_Radian
+    REAL(fp):: brdf
+    INTEGER :: i, nZ
+ 
    
     IF(PRESENT(Options)) THEN
     ENDIF
  
     IO_Status = SUCCESS
-    n_Angles = SfcOptics%n_Angles
+    nZ = SfcOptics%n_Angles
+ 
+    Sensor_Zenith_Radian    =  D2R * SfcOptics%Sensor_Zenith_Angle
+    Sensor_Azimuth_Radian   =  D2R * SfcOptics%Sensor_Azimuth_Angle
+    Source_Zenith_Radian    =  D2R * SfcOptics%Source_Zenith_Angle
+    Source_Azimuth_Radian   =  D2R * SfcOptics%Source_Azimuth_Angle
+ 
+   
     MODEL = Inq_Model_option("VIS_WATER")        
-
+ 
     SELECT CASE (TRIM(MODEL%NAME))
 
       CASE ("ATLAS")
@@ -184,12 +208,38 @@ CONTAINS
           CALL Display_Message( ROUTINE_NAME, Message, IO_Status )
         ENDIF
     
-        DO i = 1, n_Angles
+        DO i = 1, nZ
           SfcOptics%Emissivity(i,1)           =  Emissivity
-          SfcOptics%Reflectivity(i,1,i,1)     =  ONE-Emissivity
+          SfcOptics%Reflectivity(1:nZ,1,i,1)  =  (ONE-Emissivity)*SfcOptics%Weight(i)
           SfcOptics%Direct_Reflectivity(i,1)  =  ONE-Emissivity
         END DO
+ 
+       ! IF( ChannelIndex < 0 ) THEN   ! disable BRDF 
+       IF(.TRUE.) THEN
+           ! Compute the solar direct BRDF
+           IF ( SfcOptics%Is_Solar ) THEN
 
+              IF( Source_Zenith_Radian < PI/TWO ) THEN
+                   Relative_Azimuth_Radian = Sensor_Azimuth_Radian - &
+                                  Source_Azimuth_Radian
+                               
+                   IO_Status =  NESDIS_VISWater_BRDF(        &
+                            SfcOptics%Wavenumber,    &  ! Input
+                            Surface%Wind_Speed,      &  ! Input
+                            Sensor_Zenith_Radian ,   &  ! Input
+                            Sensor_Azimuth_Radian,   &  ! Input
+                            Source_Zenith_Radian ,   &  ! Input
+                            Source_Azimuth_Radian,   &  ! Input
+                            BRDF                 ,   &  ! Output
+                            iVar%BRDF            ) ! Internal variable output
+                   SfcOptics%Direct_Reflectivity(1:nZ,1) = brdf
+                
+                ELSE
+                   SfcOptics%Direct_Reflectivity(1:nZ,1) = ZERO
+                END IF
+
+           END IF
+        END IF
     END SELECT
   
 

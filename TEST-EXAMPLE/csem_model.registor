@@ -37,8 +37,6 @@ UWIR_ATLAS,             0,      ./csem_coeffs/
 [IR_WATER]
 NESDIS_IRW_Nalli,       1,      ./csem_coeffs/ 
 NESDIS_IRW_WuSmith,     0,      ./csem_coeffs/
-NESDIS_IRW_NalliV2CM,   1,      ./csem_coeffs/  # Nalli V2 with Cox-Monk
-NESDIS_IRW_NalliV2EK,   0,      ./csem_coeffs/  # Nalli V2 with Ebuchi-Kio
 NPOESS_LUT,             0
 
 [IR_SNOW]

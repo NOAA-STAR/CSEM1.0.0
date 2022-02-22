@@ -43,13 +43,14 @@ PWD     = $(shell pwd)
 #.SILENT :
 
 # PREFIX defines the subdirectory where the compiled codes will be installed
-PREFIX  = @prefix@/${distdir}
+#PREFIX  = @prefix@/${distdir}
+PREFIX  = @prefix@
 LIB_DIR = $(PREFIX)/lib
 INC_DIR = $(PREFIX)/include
 
 BAND_DIRS = $(CSEM_HOME)/src/MW $(CSEM_HOME)/src/VisIR 
 
-LIBRARY = libCSEM.a
+LIBRARY = libcsem.a
 
 all ${LIBRARY}: 
 	@echo; echo cleaning up ; \
