@@ -131,6 +131,6 @@ $(RTTOV_LIB):
 .f90.o:
 	$(FC) -c $(FCFLAGS) $(FFLAGS_HDF5)  $(NETCDF_INC) $<
 .f.o:
-	$(FC) -c $(NETCDF_INC) $<
+	$(FC) -c $(NETCDF_INC) -fPIC $<
 .F90.o:
 	$(FC) -c $(FCFLAGS) $(FFLAGS_HDF5)  $(NETCDF_INC) $<

@@ -15,6 +15,7 @@ export FCFLAGS="\
 -O2 \
 -fp-model source \
 -e08 \
+-fPIC \
 -free \
 -assume byterecl,realloc_lhs \
  ${F_COMMON_FLAGS}"
