@@ -36,12 +36,13 @@ MODULE CRTM_FASTEM_MODULE
                                       LowFrequency_MWSSEM_TL, &
                                       LowFrequency_MWSSEM_AD
   USE CRTM_Fastem1,             ONLY: Fastem1
+  USE CRTM_Fastem3,             ONLY: Fastem3
   USE CRTM_FastemXX,            ONLY: FastemX_type => iVar_type, &
                                      Compute_FastemX    => Compute_FastemXX,   &
                                      Compute_FastemX_TL => Compute_FastemXX_TL,&
                                      Compute_FastemX_AD => Compute_FastemXX_AD
   USE FASTEM_Coeff_Reader,   MWwaterC => CSEM_MWwaterC
-  
+
   ! Disable implicit typing
   IMPLICIT NONE
 
@@ -247,7 +248,7 @@ CONTAINS
        ! FastemX model
        Azimuth_Angle = Wind_Direction - Sensor_Azimuth_Angle
 
-       CALL Compute_FastemX(                   &
+       CALL Compute_FastemX(                    &
                MWwaterC                       , & ! Input model coefficients
                Frequency                      , & ! Input
                nZ                             , &  ! Input
@@ -260,7 +261,20 @@ CONTAINS
                Reflectivity(:)                , & ! Output
                Azimuth_Angle                  , & ! Optional input
                Transmittance                    )  ! Optional input
-      ELSE
+    ELSE IF( FASTEM_Version == 3 ) THEN
+        CALL Fastem3(                            &
+                     Frequency,                 & ! INPUT
+                     Angle,                     & ! INPUT
+                     Sensor_Azimuth_Angle,      & ! INPUT in degree
+                     Water_Temperature,         & ! INPUT
+                     Wind_Speed,                & ! INPUT
+                     Wind_Direction,            & ! INPUT in degree
+                     Transmittance,             & ! INPUT
+                     Fastem_Version,            & ! INPUT
+                     Emissivity(:),             & ! OUTPUT
+                     Reflectivity(:))             ! OUTPUT
+
+    ELSE
         ! Low frequency model coupled with Fastem1
         IF( Frequency < LOW_F_THRESHOLD ) THEN
            ! Call the low frequency model
@@ -459,7 +473,6 @@ CONTAINS
     err_stat = SUCCESS
     Reflectivity = ZERO
     nZ = size(Angles)
-
     ! Compute the surface optical parameters
     IF( FASTEM_Version == 6 .OR. FASTEM_Version == 5) THEN
       ! FastemX model
@@ -480,8 +493,23 @@ CONTAINS
                Azimuth_Angle                          , &  ! Optional input
                Transmittance                            )  ! Optional input
       END DO
+    ELSE IF( FASTEM_Version == 3 ) THEN
 
-    ELSE
+       DO i = 1, nZ
+          CALL Fastem3(                         &
+                     Frequency,                 & ! INPUT
+                     Angles(i),                 & ! INPUT
+                     Sensor_Azimuth_Angle,      & ! INPUT in degree
+                     Water_Temperature,         & ! INPUT
+                     Wind_Speed,                & ! INPUT
+                     Wind_Direction,            & ! INPUT in degree
+                     Transmittance,             & ! INPUT
+                     Fastem_Version,            & ! INPUT
+                     Emissivity(i,:),           & ! OUTPUT
+                     Reflectivity(i,:))           ! OUTPUT
+
+       END DO
+   ELSE
 
       ! Low frequency model coupled with Fastem1
       IF( Frequency < LOW_F_THRESHOLD ) THEN
@@ -660,6 +688,9 @@ CONTAINS
                Transmittance_TL = Transmittance_TL   )  ! Optional TL input
 
       END DO
+    ELSE IF( FASTEM_Version == 3 ) THEN
+        Emissivity_TL =  ZERO                 
+        Reflectivity_TL = ZERO 
 
     ELSE
 
@@ -846,6 +877,10 @@ CONTAINS
       END DO
       Wind_Direction_AD = Wind_Direction_AD + Azimuth_Angle_AD
 
+    ELSE IF( FASTEM_Version == 3 ) THEN
+        Emissivity_AD = ZERO               
+        Reflectivity_AD = ZERO
+ 
     ELSE
 
       ! Low frequency model coupled with Fastem1

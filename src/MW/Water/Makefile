@@ -53,7 +53,7 @@ CRTM_FASTEM = \
           Reflection_Correction_Module.o \
           Small_Scale_Correction_Module.o  Large_Scale_Correction_Module.o \
           CRTM_LowFrequency_MWSSEM.o \
-	  CRTM_Fastem1.o CRTM_FastemXX.o  FASTEM_Coeff_Reader.o\
+	  CRTM_Fastem1.o CRTM_Fastem3.o  CRTM_FastemXX.o  FASTEM_Coeff_Reader.o\
           CRTM_FASTEM_MODULE.o  
 
 RTTOV_FASTEM  = \

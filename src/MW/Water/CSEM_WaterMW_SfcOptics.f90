@@ -230,6 +230,9 @@ CONTAINS
 
        ELSE IF(INDEX(TRIM(MODEL%NAME),'NESDIS_FASTEM') > 0) THEN
  
+         IF(TRIM(MODEL%NAME) .EQ. "NESDIS_FASTEM_V3") THEN
+           FASTEM_Version = 3
+         ENDIF
 
          IF(TRIM(MODEL%NAME) .EQ. "NESDIS_FASTEM_V5") THEN
            FASTEM_Version = 5
@@ -239,7 +242,7 @@ CONTAINS
            FASTEM_Version = 6
            MWwaterCoeff_File = 'FASTEM6.MWwater.EmisCoeff.nc'
          ENDIF
-         IF(.NOT. CSEM_MWwaterCoeff_INIT) THEN
+         IF((.NOT. CSEM_MWwaterCoeff_INIT) .AND. FASTEM_Version /= 3) THEN
            IO_Status = CRTM_FASTEM_Init( &
                 TRIM(ADJUSTL(DB_PATH))//TRIM(ADJUSTL(MWwaterCoeff_File)), FASTEM_Version )
 
