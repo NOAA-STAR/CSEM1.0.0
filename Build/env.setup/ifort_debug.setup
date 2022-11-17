@@ -25,9 +25,11 @@ export FCFLAGS="\
 export FLFLAGS="\
  ${F_COMMON_FLAGS}"
 
-export CSEM_HOME="/data/jcsda/mchen/CSEM"
+#export CSEM_HOME="/data/jcsda/mchen/CSEM"
 export NETCDF_HOME="/data/jcsda/mchen/netcdf-fortran-4.4.4/ifort"
 export HDF5_HOME="/data/jcsda/mchen/hdf5-1.8.20-ifort"
+export NC4_DIR=${NETCDF_HOME}
+export HDF_DIR=${HDF5_HOME}
 
 echo "========================================="
 echo " CSEM compilation environment variables:"
